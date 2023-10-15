@@ -1,6 +1,6 @@
 /* eslint-disable wrap-regex */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { ObjectType } from "./types";
 import { Document, HydratedDocument } from "mongoose";
 import {
@@ -42,8 +42,9 @@ export function isValidGenreId(id: number): boolean {
 }
 
 export function convertGenreIdToGenre(id: number): string {
-  return Object.values(Genres).filter((item) => item.id === id)
-  .map(item=>item.name)[0];
+  return Object.values(Genres)
+    .filter((item) => item.id === id)
+    .map((item) => item.name)[0];
 }
 
 export function isValidCountryId(val: string): boolean {
@@ -77,4 +78,10 @@ export async function updateModel<
 
 export function SuccessHandler(res: Response, json: object): Response<object> {
   return res.status(200).send({ status: 200, ...json });
+}
+
+export function formatReleaseDateByYear(release_date: string): string | null {
+  return isValid(new Date(release_date))
+    ? format(new Date(release_date), "yyyy")
+    : null;
 }

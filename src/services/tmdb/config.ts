@@ -55,7 +55,7 @@ class TmdbApiConfig {
   public movieDetailsUrl(id: number): string {
     return this._getEndpoint(TmdbApiEndpoint.movieDetail(id), {
       append_to_response:
-        "videos,credits,alternative_titles,similar,watch/providers",
+        "videos,credits,alternative_titles,similar,watch/providers,recommendations",
     });
   }
 

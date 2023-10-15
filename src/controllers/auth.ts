@@ -46,6 +46,8 @@ class AuthController {
   public static async login(req: Request, res: Response): Promise<any> {
     try {
       const { usernameOrEmail, password } = req.body;
+
+      console.log(req.body);
       if (!usernameOrEmail)
         return ErrorHandler(
           res,
@@ -67,6 +69,7 @@ class AuthController {
       const accessToken = JwtUtil.generateAccessToken({ id: user._id });
       const refreshToken = JwtUtil.generateRefreshToken({ id: user._id });
 
+      console.log("logged in");
       return res.status(200).json({ user, accessToken, refreshToken });
     } catch (err) {
       return ErrorHandler(res, err as Error);

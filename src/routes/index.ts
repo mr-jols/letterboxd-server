@@ -14,6 +14,7 @@ router.get("/", (_: Request, res: Response) =>
 
 router.use(authRouter);
 
+router.get("/tmdb/longest",TmdbController.getMovieWithLongestSynopsis);
 router.get("/tmdb/trending-movies", TmdbController.getTrendingMovies);
 router.get("/tmdb/search-movies", TmdbController.searchMovies);
 router.get("/tmdb/search-people", TmdbController.searchPeople);
