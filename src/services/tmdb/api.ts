@@ -4,6 +4,7 @@ import {
   MovieDetails,
   Movies,
   People,
+  PersonDetails,
   ProductionCompanies,
   SearchOptions,
 } from "./types";
@@ -42,7 +43,7 @@ class TmdbApi {
 
   public static async getPersonDetails(
     id: number
-  ): Promise<AxiosResponse<MovieDetails>> {
+  ): Promise<AxiosResponse<PersonDetails>> {
     return axios.get(tmdb.personDetailsUrl(id));
   }
 }

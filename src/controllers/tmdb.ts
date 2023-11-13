@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 /* eslint-disable @typescript-eslint/no-for-in-array */
 import { type Response, type Request } from "express";
 import { ErrorHandler } from "../utils/errors/functions";
@@ -12,9 +13,11 @@ import {
 } from "../utils/functions";
 import { BadRequestError } from "../utils/errors/errors";
 import {
+  Cast,
   Movie,
   MovieDetails,
   Movies,
+  People,
   ProductionCompany,
   Videos,
 } from "../services/tmdb/types";
@@ -110,8 +113,7 @@ export class TmdbController {
           console.log(`count- ${overview.length} id- ${id} Title:- ${title}`);
           largest = [overview, id, title];
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     }
 
     return SuccessHandler(res, {
@@ -266,11 +268,18 @@ export class TmdbController {
       const { query, page } = req.query;
       const isPageValid = isPage(page);
       const isQueryValid = isString(query);
-      const result = await TmdbApi.searchPeople({
-        query: isQueryValid ? query : ("" as any),
-        page: isPageValid ? page : (1 as any),
+      const tmdbResponse = (
+        await TmdbApi.searchPeople({
+          query: isQueryValid ? query : ("" as any),
+          page: isPageValid ? page : (1 as any),
+        })
+      ).data;
+      return SuccessHandler(res, <People>{
+        ...tmdbResponse,
+        results: tmdbResponse.results.sort(
+          (a, b) => b.popularity - a.popularity
+        ),
       });
-      return res.status(200).json(result.data);
     } catch (err) {
       return ErrorHandler(res, err as Error);
     }
@@ -299,12 +308,27 @@ export class TmdbController {
     res: Response
   ): Promise<any> {
     try {
-      const { id } = req.params;
-      const isIdValid = !isNaN(Number(id));
+      const isIdValid = !isNaN(Number(req.params.id));
       if (!isIdValid)
         return ErrorHandler(res, new BadRequestError("Invalid Movie id"));
-      const result = await TmdbApi.getPersonDetails(Number(id));
-      return res.status(200).json(result.data);
+      const { id, name, biography, profile_path, credits } = (
+        await TmdbApi.getPersonDetails(Number(req.params.id))
+      ).data;
+      const accumulator: { [key: string]: Cast[] } = {};
+      return SuccessHandler(res, {
+        id,
+        name,
+        ...credits.crew.sort(
+          (a, b) => b.popularity - a.popularity
+        ).reduce((acc, val) => {
+          console.log(acc[val?.job ?? ""]);
+          if (acc[val?.job ?? "misc"])
+            acc[val?.job ?? "misc"] =
+              acc[val?.job ?? "misc"]?.concat(val) ?? acc.misc.concat(val);
+          else acc[val?.job ?? "misc"] = [val];
+          return acc;
+        }, accumulator),
+      });
     } catch (err) {
       return ErrorHandler(res, err as Error);
     }
